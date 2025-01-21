@@ -21,7 +21,7 @@ const ThemeSelector = () => {
   const {theme, setTheme} = useCodeEditorStore();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const currentTheme = THEMES.find((t) => t.id === theme) || THEMES[0];
+  const currentTheme = THEMES.find((t) => t.id === theme) ;
 
   useEffect( () => {
     const handleClickOutside = (event : MouseEvent) => {
@@ -87,7 +87,7 @@ const ThemeSelector = () => {
                 onClick={() => setTheme(t.id)}
               >
                 <div className='absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0
-                group-hover:opacity-100 transition-opacity'/>
+                group-hover:opacity-100 transition-opacity rounded-lg'/>
 
               <div className={`flex items-center justify-center size-8 rounded-lg 
                 ${theme === t.id ? 'bg-blue-500/10 text-blue-400' : "bg-gray-800/50 text-gray-400"}

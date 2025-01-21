@@ -1,13 +1,18 @@
 "use client";
 import { useCodeEditorStore } from '@/store/useCodeEditorStore';
 import React, { useEffect, useState } from 'react'
-import { LANGUAGE_CONFIG } from '../_constants';
+import { defineMonacoThemes, LANGUAGE_CONFIG } from '../_constants';
 import Image from 'next/image';
 import { RotateCcwIcon, ShareIcon, TypeIcon } from 'lucide-react';
 import useMounted from '@/hooks/useMounted';
 import { motion } from "framer-motion";
+import { Editor } from '@monaco-editor/react';
+import { useClerk } from '@clerk/nextjs';
+import { EditorPanelSkeleton } from './EditorPanelSkeleton';
 
 function EditorPanel() {
+
+  const clerk = useClerk();
 
   const [isShareDialogOpen, SetIsShareDialogOpen] = useState(false);
   const { language, theme, fontSize, editor, setFontSize, setEditor} = useCodeEditorStore();
@@ -15,17 +20,28 @@ function EditorPanel() {
 
   useEffect(() => {
     const savedCode = localStorage.getItem(`editor-code-${language}`);
-    const newCode = savedCode || LANGUAGE_CONFIG[language].defaultCode;
+
+    const defaultCode = LANGUAGE_CONFIG[language]?.defaultCode || '// Start coding here...';
+    const newCode = savedCode || defaultCode
+
+    console.log("Saved Code:", savedCode); // Debugging
+    console.log("Default Code:", defaultCode); // Debugging
+  
     if(editor) editor.setValue(newCode)
   },[language,editor])
 
   useEffect(() => {
     const savedFontSize  = localStorage.getItem("editor-font-size");
+
+    console.log("Saved Font Size:", savedFontSize); // Debugging
+
     if(savedFontSize) setFontSize(parseInt(savedFontSize))
   },[setFontSize])
 
   const handleRefresh = () => {
-    const defaultCode  = LANGUAGE_CONFIG[language].defaultCode
+    const defaultCode  = LANGUAGE_CONFIG[language].defaultCode || '// Start coding here...' 
+    console.log("Resetting to Default Code:", defaultCode); // Debugging
+
     if(editor) editor.setValue(defaultCode);
     localStorage.removeItem(`editor-code-${language}`)
   }
@@ -45,6 +61,8 @@ function EditorPanel() {
   return (
     <div className='relative'>
       <div className='relative bg-[#12121a]/90 backdrop-blur rounded-xl border border-white/[0.5] p-6'>
+
+      {/* Header */}
         <div className='flex items-center justify-between mb-4'>
           <div className='flex items-center gap-3'>
             <div className='flex items-center justify-center size-8 rounded-lg bg-[#1e1e2e] ring-1 ring-white/5'>
@@ -97,6 +115,44 @@ function EditorPanel() {
               <span className="text-sm font-medium text-white ">Share</span>
             </motion.button>
           </div>
+        </div>
+
+        {/* Editor */}
+
+        <div className='relative group rounded-xl overflow-hidden ring-1 ring-white/[0.05]'>
+         { clerk.loaded && <Editor
+          height="600px"
+          language={LANGUAGE_CONFIG[language].monacoLanguage}
+          onChange={handleEditorChange}
+          theme={theme}
+          beforeMount={defineMonacoThemes}
+          onMount={(editor) => setEditor(editor) }
+
+          options={{
+            minimap:{enabled : false},
+            fontSize,
+            automaticLayout : true,
+            scrollBeyondLastLine : true,
+            padding : {top : 16, bottom : 16},
+            renderWhiteSpace : "selection",
+            fontFamily : '"Fira Code", "Cascadia Code" , Consolas , monospace ',
+            fontLigatures  : true,
+            cursorBlinking : "smooth",
+            smoothScrolling : true,
+            contextmenu : true,
+            renderLineHeightlight : 'all',
+            lineHeight : 1.6,
+            letterSpacing : 0.5,
+            roundedSelection : true,
+            scrollbar : {
+              verticalScrollbarSize : 8,
+              horizontalScrollbarSize : 8
+            }
+
+          }}
+        /> }
+
+        {!clerk.loaded  && <EditorPanelSkeleton/>}
         </div>
       </div>
     </div>
