@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Editor } from '@monaco-editor/react';
 import { useClerk } from '@clerk/nextjs';
 import { EditorPanelSkeleton } from './EditorPanelSkeleton';
+import ShareSnippetDialog from './ShareSnippetDialog';
 
 function EditorPanel() {
 
@@ -155,6 +156,8 @@ function EditorPanel() {
         {!clerk.loaded  && <EditorPanelSkeleton/>}
         </div>
       </div>
+
+      {isShareDialogOpen && <ShareSnippetDialog onClose = {() => SetIsShareDialogOpen(false)}/> }
     </div>
   )
 }
