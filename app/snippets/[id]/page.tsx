@@ -21,6 +21,9 @@ function SnippetDetailPage() {
     const comments = useQuery(api.snippets.getComments, {snippetId : snippetId as Id<"snippets">});
 
     if(snippet === undefined) return <SnippetLoadingSkeleton />
+    if(!snippet) {
+      return <div>Snippet not found</div>; // Show an error message instead of breaking the UI
+    }
 
 
   return (
@@ -36,8 +39,8 @@ function SnippetDetailPage() {
               <div className="flex items-center gap-4">
                 <div className="flex items-center justify-center size-12 rounded-xl bg-[#ffffff08] p-2.5">
                   <img
-                    src={`/${snippet.language}.png`}
-                    alt={`${snippet.language} logo`}
+                    src={`/${snippet?.language}.png`}
+                    alt={`${snippet?.language} logo`}
                     className="w-full h-full object-contain"
                   />
                 </div>

@@ -33,35 +33,32 @@ export const createSnippet = mutation({
 
 });
 
-export const getSnippets = query({
-    handler : async(ctx) => {
-        const snippets = await ctx.db.query("snippets").order("desc").collect();
-        return snippets;
+
+export const starSnippet = mutation({
+  args: {
+    snippetId: v.id("snippets"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const existing = await ctx.db
+      .query("stars")
+      .withIndex("by_user_id_and_snippet_id")
+      .filter(
+        (q) =>
+          q.eq(q.field("userId"), identity.subject) && q.eq(q.field("snippetId"), args.snippetId)
+      )
+      .first();
+
+    if (existing) {
+      await ctx.db.delete(existing._id);
+    } else {
+      await ctx.db.insert("stars", {
+        userId: identity.subject,
+        snippetId: args.snippetId,
+      });
     }
-});
-
-export const getSnippetById = query({
-  args:{snippetId : v.id("snippets")},
-  handler: async(ctx, args) => {
-      const snippet = await ctx.db.get(args.snippetId);
-      if(!snippet) return new Error("Snippet not found");
-
-      return snippet;
-  }
-});
-
-export const getComments = query({
-  args: {snippetId : v.id("snippets")},
-  handler : async(ctx,args) => {
-    const comments = await ctx.db
-    .query("snippetComments")
-    .withIndex("by_snippet_id")
-    .filter((q) => q.eq(q.field("snippetId"), args.snippetId))
-    .order("desc")
-    .collect()
-
-    console.log("Fetched Comments for Snippet:", comments);
-    return comments;
   },
 });
 
@@ -107,7 +104,41 @@ export const deleteComment = mutation({
 
     await ctx.db.delete(args.commentId);
   }
-})
+});
+
+
+export const getSnippets = query({
+    handler : async(ctx) => {
+        const snippets = await ctx.db.query("snippets").order("desc").collect();
+        return snippets || null;
+    }
+});
+
+export const getSnippetById = query({
+  args:{snippetId : v.id("snippets")},
+  handler: async(ctx, args) => {
+      const snippet = await ctx.db.get(args.snippetId);
+      // if(!snippet) return new Error("Snippet not found");
+
+      return snippet || null;
+  }
+});
+
+export const getComments = query({
+  args: {snippetId : v.id("snippets")},
+  handler : async(ctx,args) => {
+    const comments = await ctx.db
+    .query("snippetComments")
+    .withIndex("by_snippet_id")
+    .filter((q) => q.eq(q.field("snippetId"), args.snippetId))
+    .order("desc")
+    .collect()
+
+    console.log("Fetched Comments for Snippet:", comments);
+    return comments;
+  },
+});
+
 export const isSnippetStarred = query({
     args : {
         snippetId : v.id("snippets")
@@ -177,34 +208,6 @@ export const deleteSnippet = mutation({
       }
   
       await ctx.db.delete(args.snippetId);
-    },
-});
-
-export const starSnippet = mutation({
-    args: {
-      snippetId: v.id("snippets"),
-    },
-    handler: async (ctx, args) => {
-      const identity = await ctx.auth.getUserIdentity();
-      if (!identity) throw new Error("Not authenticated");
-  
-      const existing = await ctx.db
-        .query("stars")
-        .withIndex("by_user_id_and_snippet_id")
-        .filter(
-          (q) =>
-            q.eq(q.field("userId"), identity.subject) && q.eq(q.field("snippetId"), args.snippetId)
-        )
-        .first();
-  
-      if (existing) {
-        await ctx.db.delete(existing._id);
-      } else {
-        await ctx.db.insert("stars", {
-          userId: identity.subject,
-          snippetId: args.snippetId,
-        });
-      }
     },
 });
 

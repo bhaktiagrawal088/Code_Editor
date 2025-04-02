@@ -88,7 +88,7 @@ function Comments({snippetId} : {snippetId : Id<"snippets">}) {
                 comment={comment}
                 onDelete={handleDeleteComment}
                 isDeleting={deletingCommentId === comment._id}
-                currentUserId={user?.id}
+                currentUserId={user?.id ?? ""}
                 />
         )) ) : (
             <p>No comment yet</p>

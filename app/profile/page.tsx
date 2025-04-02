@@ -66,7 +66,7 @@ function ProfilePage() {
             {/* Profile Header */}
 
             {
-                userStats && userData && (
+                userStats && userData && user && (
                     <ProfileHeader userStats ={userStats} userData={userData} user={user} />
                 )
             }
