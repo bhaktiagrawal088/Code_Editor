@@ -4,7 +4,7 @@ import { api } from '@/convex/_generated/api';
 import React from 'react'
 import Link from 'next/link';
 import { Blocks, Code2, Sparkles } from 'lucide-react';
-import { SignedIn, SignedOut, SignInButton} from '@clerk/nextjs';
+import { SignedIn} from '@clerk/nextjs';
 import ThemeSelector from './ThemeSelector';
 import LanguageSelector from './LanguageSelector';
 import RunButton from './RunButton';
