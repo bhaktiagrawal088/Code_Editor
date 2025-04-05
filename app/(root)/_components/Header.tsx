@@ -56,10 +56,10 @@ async function Header() {
             <LanguageSelector hasAccess ={Boolean(convexUser?.isPro)} />
           </div>
 
-          <SignedOut>
+          {/* <SignedOut>
               <SignInButton/>
           
-          </SignedOut>
+          </SignedOut> */}
 
           {!convexUser?.isPro && (
             <Link href='/pricing' 
